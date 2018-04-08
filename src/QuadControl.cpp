@@ -77,7 +77,7 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   // F1 + F2 + F3 + F4 = collThrustCmd = a
   // F1 - F2 - F3 + F4 = Mx / l = b
   // F1 + F2 - F3 - F4 = My / l = c
-  // F1 - F2 + F3 - F4 = Mz / kappa = d
+  // F1 - F2 + F3 - F4 = Mz / -kappa = d
   // solution:
   // F1 = (a + b + c + d) / 4
   // F2 = (a - b + c - d) / 4
@@ -86,7 +86,7 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   float a = collThrustCmd;
   float b = momentCmd.x / L;
   float c = momentCmd.y / L;
-  float d = momentCmd.z / kappa;
+  float d = momentCmd.z / -kappa;
 
   // note: rotors in the about equations are ordered in front left, front right, rear right, rear left
   cmd.desiredThrustsN[0] = (a + b + c + d) / 4.f; // front left
@@ -153,7 +153,7 @@ V3F QuadControl::RollPitchControl(V3F accelCmd, Quaternion<float> attitude, floa
 
   float bx = R(0, 2);
   float by = R(1, 2);
-  float c = collThrustCmd / mass;
+  float c = -collThrustCmd / mass;
 
   float bxCmd = accelCmd.x / c;
   float byCmd = accelCmd.y / c;
@@ -240,7 +240,11 @@ V3F QuadControl::LateralPositionControl(V3F posCmd, V3F velCmd, V3F pos, V3F vel
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
-  
+  V3F errorPosition(posCmd - pos);
+  V3F errorVelocity(velCmd - vel);
+  V3F kpPos(kpPosXY, kpPosXY, 0);
+  V3F kdPos(kpVelXY, kpVelXY, 0);
+  accelCmd = kpPosXY * errorPosition + kdPos * errorVelocity + accelCmd;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -263,6 +267,11 @@ float QuadControl::YawControl(float yawCmd, float yaw)
   float yawRateCmd=0;
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  yawCmd = fmodf(yawCmd + float(M_PI), float(2 * M_PI));
+  yaw = fmodf(yaw + float(M_PI), float(2 * M_PI));
+  float errorYaw = yawCmd - yaw;
+  errorYaw = fmodf(errorYaw, float(M_PI));
+  yawRateCmd = errorYaw * kpYaw;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
