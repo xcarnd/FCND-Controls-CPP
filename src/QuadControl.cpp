@@ -74,25 +74,25 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   // F1, F2, F3, F4: desired thrust for 1st rotor, 2nd rotor, 3rd rotor, 4th rotor
   // Mx, My, Mz: desired moment around x-axis, y-axis and z-axis
   //
-  // F1 + F2 + F3 + F4 = -collThrustCmd = a
-  // F1 - F2 + F3 - F4 = Mz / kappa = b
-  // F1 - F2 - F3 + F4 = Mx / l = c
-  // F1 + F2 - F3 - F4 = My / l = d
+  // F1 + F2 + F3 + F4 = collThrustCmd = a
+  // F1 - F2 - F3 + F4 = Mx / l = b
+  // F1 + F2 - F3 - F4 = My / l = c
+  // F1 - F2 + F3 - F4 = Mz / kappa = d
   // solution:
   // F1 = (a + b + c + d) / 4
-  // F2 = (a - b - c + d) / 4
-  // F3 = (a + b - c - d) / 4
-  // F4 = (a - b + c - d) / 4
+  // F2 = (a - b + c - d) / 4
+  // F3 = (a - b - c + d) / 4
+  // F4 = (a + b - c - d) / 4
   float a = collThrustCmd;
-  float b = momentCmd.z / kappa;
-  float c = momentCmd.x / L;
-  float d = momentCmd.y / L;
+  float b = momentCmd.x / L;
+  float c = momentCmd.y / L;
+  float d = momentCmd.z / kappa;
 
   // note: rotors in the about equations are ordered in front left, front right, rear right, rear left
   cmd.desiredThrustsN[0] = (a + b + c + d) / 4.f; // front left
-  cmd.desiredThrustsN[1] = (a - b - c + d) / 4.f; // front right
-  cmd.desiredThrustsN[2] = (a - b + c - d) / 4.f; // rear left
-  cmd.desiredThrustsN[3] = (a + b - c - d) / 4.f; // rear right
+  cmd.desiredThrustsN[1] = (a - b + c - d) / 4.f; // front right
+  cmd.desiredThrustsN[3] = (a - b - c + d) / 4.f; // rear right
+  cmd.desiredThrustsN[2] = (a + b - c - d) / 4.f; // rear left
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
