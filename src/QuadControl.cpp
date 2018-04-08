@@ -69,11 +69,30 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   // You'll need the arm length parameter L, and the drag/thrust ratio kappa
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  
+  // equations for solving this problem:
+  // F1, F2, F3, F4: desired thrust for 1st rotor, 2nd rotor, 3rd rotor, 4th rotor
+  // Mx, My, Mz: desired moment around x-axis, y-axis and z-axis
+  //
+  // F1 + F2 + F3 + F4 = -collThrustCmd = a
+  // F1 - F2 + F3 - F4 = Mz / kappa = b
+  // F1 - F2 - F3 + F4 = Mx / l = c
+  // F1 + F2 - F3 - F4 = My / l = d
+  // solution:
+  // F1 = (a + b + c + d) / 4
+  // F2 = (a - b - c + d) / 4
+  // F3 = (a + b - c - d) / 4
+  // F4 = (a - b + c - d) / 4
+  float a = collThrustCmd;
+  float b = momentCmd.z / kappa;
+  float c = momentCmd.x / L;
+  float d = momentCmd.y / L;
 
-  cmd.desiredThrustsN[0] = mass * 9.81f / 4.f; // front left
-  cmd.desiredThrustsN[1] = mass * 9.81f / 4.f; // front right
-  cmd.desiredThrustsN[2] = mass * 9.81f / 4.f; // rear left
-  cmd.desiredThrustsN[3] = mass * 9.81f / 4.f; // rear right
+  // note: rotors in the about equations are ordered in front left, front right, rear right, rear left
+  cmd.desiredThrustsN[0] = (a + b + c + d) / 4.f; // front left
+  cmd.desiredThrustsN[1] = (a - b - c + d) / 4.f; // front right
+  cmd.desiredThrustsN[2] = (a - b + c - d) / 4.f; // rear left
+  cmd.desiredThrustsN[3] = (a + b - c - d) / 4.f; // rear right
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -98,7 +117,10 @@ V3F QuadControl::BodyRateControl(V3F pqrCmd, V3F pqr)
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
-  
+  V3F error = pqrCmd - pqr;
+  V3F angular_acc = kpPQR * error;
+  V3F I = V3F(Ixx, Iyy, Izz);
+  momentCmd = I * angular_acc;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -161,7 +183,13 @@ float QuadControl::AltitudeControl(float posZCmd, float velZCmd, float posZ, flo
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
-
+  float error_z = posZCmd - posZ;
+  float error_z_dot = velZCmd - velZ;
+  float net_z_dot_dot = kpPosZ * error_z + kpVelZ * error_z_dot;
+  net_z_dot_dot = CONSTRAIN(net_z_dot_dot, -maxAscentRate / dt, maxDescentRate / dt);
+  float z_dot_dot = net_z_dot_dot - float(CONST_GRAVITY);
+  float acc = z_dot_dot / R(2, 2);
+  thrust = -acc * mass;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
   
