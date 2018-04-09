@@ -151,6 +151,8 @@ V3F QuadControl::RollPitchControl(V3F accelCmd, Quaternion<float> attitude, floa
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  // calculate the maximum allowed horizontal velocity by applying:
+ 
   float bx = R(0, 2);
   float by = R(1, 2);
   float c = -collThrustCmd / mass;
@@ -202,7 +204,8 @@ float QuadControl::AltitudeControl(float posZCmd, float velZCmd, float posZ, flo
 
   float error_z = posZCmd - posZ;
   float error_z_dot = velZCmd - velZ;
-  float net_z_dot_dot = kpPosZ * error_z + kpVelZ * error_z_dot;
+  integratedAltitudeError += error_z * dt;
+  float net_z_dot_dot = kpPosZ * error_z + kpVelZ * error_z_dot + KiPosZ * integratedAltitudeError;
   net_z_dot_dot = CONSTRAIN(net_z_dot_dot, -maxAscentRate / dt, maxDescentRate / dt);
   float z_dot_dot = net_z_dot_dot - float(CONST_GRAVITY);
   float acc = z_dot_dot / R(2, 2);
@@ -239,12 +242,15 @@ V3F QuadControl::LateralPositionControl(V3F posCmd, V3F velCmd, V3F pos, V3F vel
   posCmd.z = pos.z;
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
-
+  velCmd.x = CONSTRAIN(velCmd.x, -maxSpeedXY, maxSpeedXY);
+  velCmd.y = CONSTRAIN(velCmd.y, -maxSpeedXY, maxSpeedXY);
   V3F errorPosition(posCmd - pos);
   V3F errorVelocity(velCmd - vel);
   V3F kpPos(kpPosXY, kpPosXY, 0);
   V3F kdPos(kpVelXY, kpVelXY, 0);
   accelCmd = kpPosXY * errorPosition + kdPos * errorVelocity + accelCmd;
+  accelCmd.x = CONSTRAIN(accelCmd.x, -maxAccelXY, maxAccelXY);
+  accelCmd.y = CONSTRAIN(accelCmd.y, -maxAccelXY, maxAccelXY);
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
