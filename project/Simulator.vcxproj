@@ -78,6 +78,12 @@
     <ClInclude Include="..\src\Utility\StringUtils.h" />
     <ClInclude Include="..\src\VehicleDatatypes.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\config\4_Nonidealities.txt" />
+    <Text Include="..\config\5_TrajectoryFollow.txt" />
+    <Text Include="..\config\QuadControlParams.txt" />
+    <Text Include="..\config\QuadPhysicalParams.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D8435B4A-B444-4C1B-ABC8-6D1C779B268D}</ProjectGuid>
