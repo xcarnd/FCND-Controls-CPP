@@ -83,10 +83,9 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   // F2 = (a - b + c - d) / 4
   // F3 = (a - b - c + d) / 4
   // F4 = (a + b - c - d) / 4
-  float l = L / sqrtf(2.0f);
   float a = collThrustCmd;
-  float b = momentCmd.x / l;
-  float c = momentCmd.y / l;
+  float b = momentCmd.x / L;
+  float c = momentCmd.y / L;
   float d = momentCmd.z / -kappa;
 
   // note: rotors in the about equations are ordered in front left, front right, rear right, rear left
@@ -206,7 +205,7 @@ float QuadControl::AltitudeControl(float posZCmd, float velZCmd, float posZ, flo
   float error_z = posZCmd - posZ;
   float error_z_dot = velZCmd - velZ;
   integratedAltitudeError += error_z * dt;
-  float net_z_dot_dot = kpPosZ * error_z + kpVelZ * error_z_dot + KiPosZ * integratedAltitudeError + accelZCmd;
+  float net_z_dot_dot = kpPosZ * error_z + kpVelZ * error_z_dot + KiPosZ * integratedAltitudeError;
   net_z_dot_dot = CONSTRAIN(net_z_dot_dot, -maxAscentRate / dt, maxDescentRate / dt);
   float z_dot_dot = net_z_dot_dot - float(CONST_GRAVITY);
   float acc = z_dot_dot / R(2, 2);
