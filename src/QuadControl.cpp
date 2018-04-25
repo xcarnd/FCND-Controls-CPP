@@ -204,10 +204,9 @@ float QuadControl::AltitudeControl(float posZCmd, float velZCmd, float posZ, flo
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
   float error_z = posZCmd - posZ;
-  float error_z_dot = velZCmd - velZ;
+  float error_z_dot = CONSTRAIN(velZCmd, -maxAscentRate, maxDescentRate) - velZ;
   integratedAltitudeError += error_z * dt;
   float net_z_dot_dot = kpPosZ * error_z + kpVelZ * error_z_dot + KiPosZ * integratedAltitudeError + accelZCmd;
-  net_z_dot_dot = CONSTRAIN(net_z_dot_dot, -maxAscentRate / dt, maxDescentRate / dt);
   float z_dot_dot = net_z_dot_dot - float(CONST_GRAVITY);
   float acc = z_dot_dot / R(2, 2);
   thrust = -acc * mass;
